@@ -13,7 +13,6 @@ const navItems = [
   { id: 'research', label: 'Product Research' },
   { id: 'dashboard', label: 'Intelligence' },
   { id: 'api-portal', label: 'API Portal' },
-  { id: 'pricing', label: 'Pricing' },
 ];
 
 export default function Navbar({ currentPage, onNavigate, onOpenAds }: NavbarProps) {
@@ -21,13 +20,13 @@ export default function Navbar({ currentPage, onNavigate, onOpenAds }: NavbarPro
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/95 backdrop-blur-md light:border-slate-200 light:bg-white/95">
+    <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/95 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <button onClick={() => onNavigate('map')} className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-400 to-teal-600">
             <TrendingUp className="h-5 w-5 text-slate-950" />
           </div>
-          <span className="text-lg font-bold tracking-tight text-white light:text-slate-900">ForForex Pulse</span>
+          <span className="text-lg font-bold tracking-tight text-white">ForForex Pulse</span>
         </button>
 
         <nav className="hidden items-center gap-1 md:flex">
@@ -38,7 +37,7 @@ export default function Navbar({ currentPage, onNavigate, onOpenAds }: NavbarPro
               className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                 currentPage === item.id
                   ? 'bg-emerald-500/10 text-emerald-400'
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-white light:hover:bg-slate-100 light:hover:text-slate-900'
+                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
               }`}
             >
               {item.label}
@@ -49,7 +48,7 @@ export default function Navbar({ currentPage, onNavigate, onOpenAds }: NavbarPro
         <div className="flex items-center gap-2">
           <button
             onClick={toggleTheme}
-            className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white light:hover:bg-slate-100 light:hover:text-slate-900"
+            className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white"
             title="Toggle theme"
           >
             {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -69,17 +68,17 @@ export default function Navbar({ currentPage, onNavigate, onOpenAds }: NavbarPro
             </div>
           ) : (
             <button
-              onClick={() => onNavigate('pricing')}
+              onClick={onOpenAds}
               className="flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition-all hover:brightness-110"
             >
               <Lock className="h-4 w-4" />
-              Plans
+              Unlock PRO
             </button>
           )}
         </div>
       </div>
 
-      <nav className="flex items-center gap-1 overflow-x-auto border-t border-slate-800 px-2 py-2 md:hidden light:border-slate-200">
+      <nav className="flex items-center gap-1 overflow-x-auto border-t border-slate-800 px-2 py-2 md:hidden">
         {navItems.map((item) => (
           <button
             key={item.id}
