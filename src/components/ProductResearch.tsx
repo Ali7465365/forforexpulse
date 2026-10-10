@@ -2,11 +2,15 @@ import { useState } from 'react';
 import {
   Search, MapPin, Package, TrendingUp, Factory, Store,
   BarChart3, AlertCircle, Loader2, Globe, DollarSign,
-  Users, Truck, Award, Layers
+  Users, Truck, Award, Layers, Phone, Lock, Crown
 } from 'lucide-react';
-import { researchProduct, type ResearchResult } from '@/lib/productResearch';
+import { researchProduct, type ResearchResult, type Factory as FactoryType, type Store as StoreType } from '@/lib/productResearch';
+import { usePro } from '@/context/ProContext';
+
+const FREE_UNLOCKED = 2; // first 2 factories + first 2 stores free
 
 export default function ProductResearch() {
+  const { isPro } = usePro();
   const [product, setProduct] = useState('');
   const [city, setCity] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,32 +24,28 @@ export default function ProductResearch() {
     }
     setError('');
     setLoading(true);
-    // Small delay for UX
-    await new Promise((r) => setTimeout(r, 600));
-    const data = researchProduct(product.trim(), city.trim());
-    setResult(data);
+    await new Promise((r) => setTimeout(r, 500));
+    setResult(researchProduct(product.trim(), city.trim()));
     setLoading(false);
   }
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-slate-950 px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
-        {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-white">Product Research</h1>
           <p className="mt-1 text-sm text-slate-400">
-            Enter any product and city to get demand, pricing, supply chain, factories and retail outlets
+            Product + city → demand, pricing, factories and store cards. Full contacts & locations on PRO.
           </p>
         </div>
 
-        {/* Search box */}
         <div className="mb-8 rounded-xl border border-slate-800 bg-slate-900/60 p-5">
           <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Package className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
               <input
                 type="text"
-                placeholder="Product (e.g. Wireless Earbuds, Saffron, Leather Bags)"
+                placeholder="Product (e.g. Wireless Earbuds, Leather Bags)"
                 value={product}
                 onChange={(e) => setProduct(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -56,7 +56,7 @@ export default function ProductResearch() {
               <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
               <input
                 type="text"
-                placeholder="City (e.g. Shenzhen, Karachi, Dubai, Istanbul)"
+                placeholder="City (e.g. Shenzhen, Karachi, Dubai)"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -79,17 +79,14 @@ export default function ProductResearch() {
           )}
         </div>
 
-        {/* Results */}
         {result && (
           <div className="space-y-6">
-            {/* Meta bar */}
             <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-800 bg-slate-900/50 px-4 py-3">
               <span className="text-sm text-slate-400">Product:</span>
               <span className="font-semibold text-white">{result.product}</span>
               <span className="text-slate-600">•</span>
               <span className="text-sm text-slate-400">City:</span>
               <span className="font-semibold text-white">{result.city}</span>
-              <span className="text-slate-600">•</span>
               <span className="rounded bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-400">{result.category}</span>
               <span className="rounded bg-blue-500/15 px-2 py-0.5 text-xs font-medium text-blue-400">{result.region}</span>
               <span className="ml-auto text-xs text-slate-500">{result.confidence}</span>
@@ -112,55 +109,37 @@ export default function ProductResearch() {
               </div>
             </div>
 
-            {/* Section 2 */}
+            {/* Section 2 — Cards */}
             <div>
               <h2 className="mb-3 flex items-center gap-2 text-lg font-bold text-white">
                 <Globe className="h-5 w-5 text-emerald-400" />
                 Section 2 — Supply Chain & Market Outlets
               </h2>
+              {!isPro && (
+                <p className="mb-3 flex items-center gap-2 text-xs text-amber-400/90">
+                  <Lock className="h-3.5 w-3.5" />
+                  First {FREE_UNLOCKED} free. Unlock PRO for full contact, location and all cards.
+                </p>
+              )}
 
-              {/* Factories */}
-              <div className="mb-4">
-                <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-300">
-                  <Factory className="h-4 w-4 text-amber-400" />
-                  Hubs, Factories & Manufacturers
-                </h3>
-                <div className="space-y-2">
-                  {result.factories.map((f, i) => (
-                    <div key={i} className="rounded-lg border border-slate-800 bg-slate-900/50 p-4">
-                      <div className="flex flex-wrap items-start justify-between gap-2">
-                        <div>
-                          <div className="font-medium text-white">{f.name}</div>
-                          <div className="mt-0.5 text-xs text-slate-400">{f.city} · {f.type}</div>
-                        </div>
-                        <div className="text-sm font-semibold text-emerald-400">{f.wholesalePrice}</div>
-                      </div>
-                      <p className="mt-1.5 text-xs text-slate-500">{f.notes}</p>
-                    </div>
-                  ))}
-                </div>
+              <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-300">
+                <Factory className="h-4 w-4 text-amber-400" />
+                Hubs, Factories & Manufacturers
+              </h3>
+              <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {result.factories.map((f, i) => (
+                  <OutletCard key={i} item={f} kind="factory" locked={!isPro && i >= FREE_UNLOCKED} />
+                ))}
               </div>
 
-              {/* Stores */}
-              <div>
-                <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-300">
-                  <Store className="h-4 w-4 text-blue-400" />
-                  Stores & Retail Outlets
-                </h3>
-                <div className="space-y-2">
-                  {result.stores.map((s, i) => (
-                    <div key={i} className="rounded-lg border border-slate-800 bg-slate-900/50 p-4">
-                      <div className="flex flex-wrap items-start justify-between gap-2">
-                        <div>
-                          <div className="font-medium text-white">{s.name}</div>
-                          <div className="mt-0.5 text-xs text-slate-400">{s.city} · {s.type}</div>
-                        </div>
-                        <div className="text-sm font-semibold text-emerald-400">{s.retailPrice}</div>
-                      </div>
-                      <p className="mt-1.5 text-xs text-slate-500">{s.notes}</p>
-                    </div>
-                  ))}
-                </div>
+              <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-300">
+                <Store className="h-4 w-4 text-blue-400" />
+                Stores & Retail Outlets
+              </h3>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {result.stores.map((s, i) => (
+                  <OutletCard key={i} item={s} kind="store" locked={!isPro && i >= FREE_UNLOCKED} />
+                ))}
               </div>
             </div>
           </div>
@@ -173,6 +152,63 @@ export default function ProductResearch() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function OutletCard({
+  item,
+  kind,
+  locked,
+}: {
+  item: FactoryType | StoreType;
+  kind: 'factory' | 'store';
+  locked: boolean;
+}) {
+  const price = kind === 'factory' ? (item as FactoryType).wholesalePrice : (item as StoreType).retailPrice;
+
+  if (locked) {
+    return (
+      <div className="relative overflow-hidden rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+        <div className="blur-sm select-none">
+          <div className="mb-1 font-semibold text-white">{item.name}</div>
+          <div className="mb-2 text-lg font-bold text-emerald-400">{price}</div>
+          <div className="text-xs text-slate-500">••••••••</div>
+          <div className="text-xs text-slate-500">••••••••</div>
+        </div>
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/70">
+          <Lock className="mb-1 h-5 w-5 text-amber-400" />
+          <span className="text-xs font-semibold text-amber-300">PRO locked</span>
+          <span className="mt-0.5 text-[10px] text-slate-400">Contact + full location</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4 transition hover:border-slate-700">
+      <div className="mb-1 flex items-start justify-between gap-2">
+        <div className="font-semibold text-white">{item.name}</div>
+        {kind === 'factory' ? (
+          <Factory className="h-4 w-4 flex-shrink-0 text-amber-400" />
+        ) : (
+          <Store className="h-4 w-4 flex-shrink-0 text-blue-400" />
+        )}
+      </div>
+      <div className="mb-2 text-lg font-bold text-emerald-400">{price}</div>
+      <div className="mb-1 flex items-center gap-1.5 text-xs text-slate-400">
+        <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+        {item.location}
+      </div>
+      <div className="mb-2 flex items-center gap-1.5 text-xs text-slate-400">
+        <Phone className="h-3.5 w-3.5 flex-shrink-0" />
+        {item.contact}
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        <span className="rounded bg-slate-800 px-2 py-0.5 text-[10px] text-slate-400">{item.city}</span>
+        <span className="rounded bg-slate-800 px-2 py-0.5 text-[10px] text-slate-400">{item.type}</span>
+      </div>
+      <p className="mt-2 text-[11px] text-slate-500">{item.notes}</p>
     </div>
   );
 }
