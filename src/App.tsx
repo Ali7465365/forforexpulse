@@ -6,11 +6,10 @@ import TradeMap from '@/components/TradeMap';
 import Dashboard from '@/components/Dashboard';
 import ApiPortal from '@/components/ApiPortal';
 import ProductResearch from '@/components/ProductResearch';
-import PricingPage from '@/components/PricingPage';
 import AdModal from '@/components/AdModal';
 import { updateSEO, initSEO } from '@/lib/seo';
 
-type Page = 'map' | 'research' | 'dashboard' | 'api-portal' | 'pricing';
+type Page = 'map' | 'research' | 'dashboard' | 'api-portal';
 
 const pageMeta: Record<Page, { title: string; description: string }> = {
   map: {
@@ -28,10 +27,6 @@ const pageMeta: Record<Page, { title: string; description: string }> = {
   'api-portal': {
     title: 'ForForex Pulse - Developer API Portal',
     description: 'API keys and live trade data queries.',
-  },
-  pricing: {
-    title: 'ForForex Pulse - Pricing Plans',
-    description: 'Free, Pro ($10) and Platinum ($25) plans. EasyPaisa, Stripe, PayPal.',
   },
 };
 
@@ -55,7 +50,7 @@ function App() {
   return (
     <ThemeProvider>
       <ProProvider>
-        <div className="min-h-screen bg-slate-950 dark:bg-slate-950 light:bg-slate-50">
+        <div className="min-h-screen bg-slate-950">
           <Navbar
             currentPage={currentPage}
             onNavigate={(p) => setCurrentPage(p as Page)}
@@ -66,7 +61,6 @@ function App() {
           {currentPage === 'research' && <ProductResearch />}
           {currentPage === 'dashboard' && <Dashboard />}
           {currentPage === 'api-portal' && <ApiPortal />}
-          {currentPage === 'pricing' && <PricingPage />}
 
           <AdModal isOpen={adModalOpen} onClose={() => setAdModalOpen(false)} />
         </div>
