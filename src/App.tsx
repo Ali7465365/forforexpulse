@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ProProvider } from '@/context/ProContext';
-import { ThemeProvider } from '@/context/ThemeContext';
+import { ThemeProvider, useTheme } from '@/context/ThemeContext';
 import Navbar from '@/components/Navbar';
 import TradeMap from '@/components/TradeMap';
 import Dashboard from '@/components/Dashboard';
@@ -30,7 +30,8 @@ const pageMeta: Record<Page, { title: string; description: string }> = {
   },
 };
 
-function App() {
+function AppShell() {
+  const { theme } = useTheme();
   const [currentPage, setCurrentPage] = useState<Page>('map');
   const [adModalOpen, setAdModalOpen] = useState(false);
 
@@ -47,25 +48,36 @@ function App() {
     });
   }, [currentPage]);
 
+  const shellClass =
+    theme === 'dark'
+      ? 'min-h-screen bg-slate-950 text-white'
+      : 'min-h-screen bg-slate-50 text-slate-900';
+
+  return (
+    <div className={shellClass}>
+      <Navbar
+        currentPage={currentPage}
+        onNavigate={(p) => setCurrentPage(p as Page)}
+        onOpenAds={() => setAdModalOpen(true)}
+      />
+
+      {currentPage === 'map' && <TradeMap />}
+      {currentPage === 'research' && (
+        <ProductResearch onOpenPlans={() => setAdModalOpen(true)} />
+      )}
+      {currentPage === 'dashboard' && <Dashboard />}
+      {currentPage === 'api-portal' && <ApiPortal />}
+
+      <AdModal isOpen={adModalOpen} onClose={() => setAdModalOpen(false)} />
+    </div>
+  );
+}
+
+function App() {
   return (
     <ThemeProvider>
       <ProProvider>
-        <div className="min-h-screen bg-slate-950">
-          <Navbar
-            currentPage={currentPage}
-            onNavigate={(p) => setCurrentPage(p as Page)}
-            onOpenAds={() => setAdModalOpen(true)}
-          />
-
-          {currentPage === 'map' && <TradeMap />}
-          {currentPage === 'research' && (
-            <ProductResearch onOpenPlans={() => setAdModalOpen(true)} />
-          )}
-          {currentPage === 'dashboard' && <Dashboard />}
-          {currentPage === 'api-portal' && <ApiPortal />}
-
-          <AdModal isOpen={adModalOpen} onClose={() => setAdModalOpen(false)} />
-        </div>
+        <AppShell />
       </ProProvider>
     </ThemeProvider>
   );
