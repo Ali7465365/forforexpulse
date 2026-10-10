@@ -31,7 +31,8 @@ const pageMeta: Record<Page, { title: string; description: string }> = {
 };
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<Page>('map');
+  // Default to Product Research — first 30 seconds matter
+  const [currentPage, setCurrentPage] = useState<Page>('research');
   const [adModalOpen, setAdModalOpen] = useState(false);
 
   useEffect(() => {
@@ -58,7 +59,9 @@ function App() {
           />
 
           {currentPage === 'map' && <TradeMap />}
-          {currentPage === 'research' && <ProductResearch />}
+          {currentPage === 'research' && (
+            <ProductResearch onOpenPlans={() => setAdModalOpen(true)} />
+          )}
           {currentPage === 'dashboard' && <Dashboard />}
           {currentPage === 'api-portal' && <ApiPortal />}
 
