@@ -25,6 +25,8 @@ export type Factory = {
   city: string;
   type: string;
   wholesalePrice: string;
+  contact: string;
+  location: string;
   notes: string;
 };
 
@@ -33,6 +35,8 @@ export type Store = {
   city: string;
   type: string;
   retailPrice: string;
+  contact: string;
+  location: string;
   notes: string;
 };
 
@@ -48,7 +52,6 @@ export type ResearchResult = {
   generatedAt: string;
 };
 
-// ─── Category detection ───────────────────────────────────────────
 function detectCategory(product: string): string {
   const p = product.toLowerCase();
   if (/earbud|headphone|phone|laptop|tablet|charger|cable|electronic|led|camera|drone|speaker|smart/.test(p)) return 'Electronics';
@@ -62,7 +65,6 @@ function detectCategory(product: string): string {
   return 'General';
 }
 
-// ─── City → Region ────────────────────────────────────────────────
 const CITY_REGION: Record<string, string> = {
   shanghai: 'China', shenzhen: 'China', guangzhou: 'China', yiwu: 'China', beijing: 'China',
   hongkong: 'China', 'hong kong': 'China', dongguan: 'China', ningbo: 'China',
@@ -87,7 +89,6 @@ function getRegion(city: string): string {
   return CITY_REGION[key] ?? 'Global';
 }
 
-// ─── Price & metric helpers by category + region ──────────────────
 function getBasePrices(category: string, region: string): { retail: number; wholesale: number; currency: string } {
   const isAsia = ['China', 'India', 'Pakistan', 'Indonesia', 'Thailand', 'Vietnam'].includes(region);
   const isMiddleEast = ['UAE', 'Saudi Arabia', 'Turkey', 'Egypt'].includes(region);
@@ -110,7 +111,7 @@ function getBasePrices(category: string, region: string): { retail: number; whol
   return {
     retail: Math.round(t.base * mult),
     wholesale: Math.round(t.base * t.wholesaleRatio * mult),
-    currency: isWest ? 'USD' : isAsia ? 'USD' : 'USD',
+    currency: 'USD',
   };
 }
 
@@ -149,59 +150,55 @@ function getImportProfile(category: string, region: string): { req: string; impo
   return { req: 'Heavy import dependence', importPct: 75, localPct: 25 };
 }
 
-// ─── Factories & Stores generators ────────────────────────────────
 function generateFactories(product: string, city: string, category: string, region: string, wholesale: number): Factory[] {
   const cityCap = city.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
   const list: Factory[] = [];
 
   const known: Record<string, Factory[]> = {
     'shenzhen-Electronics': [
-      { name: 'Huaqiangbei Electronics Market Suppliers', city: 'Shenzhen', type: 'Wholesale Cluster', wholesalePrice: `$${Math.round(wholesale * 0.9)}–$${wholesale}`, notes: 'Largest electronics component & finished goods hub' },
-      { name: 'Foxconn / Hon Hai related OEM partners', city: 'Shenzhen / Dongguan', type: 'OEM Manufacturer', wholesalePrice: `$${Math.round(wholesale * 0.75)}+ (MOQ based)`, notes: 'Large-scale contract manufacturing' },
-      { name: 'Seg Electronics Market traders', city: 'Shenzhen', type: 'Wholesale', wholesalePrice: `$${Math.round(wholesale * 0.85)}–$${wholesale}`, notes: 'Popular for small-batch electronics' },
+      { name: 'Huaqiangbei Electronics Market Suppliers', city: 'Shenzhen', type: 'Wholesale Cluster', wholesalePrice: `$${Math.round(wholesale * 0.9)}–$${wholesale}`, contact: '+86 755-8334-xxxx', location: 'Huaqiang North Rd, Futian, Shenzhen', notes: 'Largest electronics component & finished goods hub' },
+      { name: 'SEG Electronics Market traders', city: 'Shenzhen', type: 'Wholesale', wholesalePrice: `$${Math.round(wholesale * 0.85)}–$${wholesale}`, contact: '+86 755-8321-xxxx', location: 'SEG Plaza, Huaqiangbei', notes: 'Popular for small-batch electronics' },
+      { name: 'Dongguan OEM partners (Shenzhen linked)', city: 'Dongguan', type: 'OEM Manufacturer', wholesalePrice: `$${Math.round(wholesale * 0.75)}+ (MOQ)`, contact: '+86 769-2222-xxxx', location: 'Dongguan Industrial Zone', notes: 'Large-scale contract manufacturing' },
     ],
-    'yiwu-Consumer Goods': [
-      { name: 'Yiwu International Trade City (Futian Market)', city: 'Yiwu', type: 'Wholesale Hub', wholesalePrice: `$${Math.round(wholesale * 0.7)}–$${wholesale}`, notes: 'World’s largest small-commodity wholesale market' },
+    'karachi-Electronics': [
+      { name: 'Saddar Electronics wholesalers', city: 'Karachi', type: 'Wholesale', wholesalePrice: `$${Math.round(wholesale * 0.9)}–$${Math.round(wholesale * 1.1)}`, contact: '+92 21-3568-xxxx', location: 'Saddar, Karachi', notes: 'Main electronics wholesale belt' },
+      { name: 'Bolton Market traders', city: 'Karachi', type: 'Wholesale Market', wholesalePrice: `$${Math.round(wholesale * 0.85)}–$${wholesale}`, contact: '+92 21-3272-xxxx', location: 'Bolton Market, Karachi', notes: 'Dense trading area' },
     ],
-    'surat-Textiles': [
-      { name: 'Surat Textile Market / Ring Road clusters', city: 'Surat', type: 'Textile Manufacturing', wholesalePrice: `$${Math.round(wholesale * 0.8)}–$${wholesale}`, notes: 'Major synthetic & silk textile production' },
-    ],
-    'tirupur-Textiles': [
-      { name: 'Tirupur Knitwear Exporters', city: 'Tirupur', type: 'Manufacturer / Exporter', wholesalePrice: `$${Math.round(wholesale * 0.75)}–$${Math.round(wholesale * 0.95)}`, notes: 'India’s knitwear capital' },
-    ],
-    'sialkot-Leather': [
-      { name: 'Sialkot Sports & Leather Goods manufacturers', city: 'Sialkot', type: 'Manufacturer', wholesalePrice: `$${Math.round(wholesale * 0.7)}–$${wholesale}`, notes: 'World-famous for leather goods & sports equipment' },
-    ],
-    'istanbul-Textiles': [
-      { name: 'Osmanbey / Laleli wholesale textile districts', city: 'Istanbul', type: 'Wholesale District', wholesalePrice: `$${Math.round(wholesale * 0.85)}–$${Math.round(wholesale * 1.1)}`, notes: 'Major textile & apparel wholesale area' },
+    'lahore-Electronics': [
+      { name: 'Hall Road electronics suppliers', city: 'Lahore', type: 'Wholesale / Retail', wholesalePrice: `$${Math.round(wholesale * 0.88)}–$${Math.round(wholesale * 1.1)}`, contact: '+92 42-3724-xxxx', location: 'Hall Road, Lahore', notes: 'Major electronics market' },
     ],
     'dubai-Electronics': [
-      { name: 'Dragon Mart & Computer Plaza traders', city: 'Dubai', type: 'Wholesale / Retail Hub', wholesalePrice: `$${Math.round(wholesale * 0.95)}–$${Math.round(wholesale * 1.2)}`, notes: 'Re-export and regional distribution hub' },
+      { name: 'Computer Plaza traders', city: 'Dubai', type: 'Wholesale / Retail Hub', wholesalePrice: `$${Math.round(wholesale * 0.95)}–$${Math.round(wholesale * 1.2)}`, contact: '+971 4-295-xxxx', location: 'Al Ain Centre, Bur Dubai', notes: 'Gadgets & accessories hub' },
+      { name: 'Dragon Mart electronics section', city: 'Dubai', type: 'Wholesale Cluster', wholesalePrice: `$${Math.round(wholesale * 0.9)}–$${Math.round(wholesale * 1.15)}`, contact: '+971 4-333-xxxx', location: 'International City, Dubai', notes: 'Re-export and regional distribution' },
+    ],
+    'sialkot-Leather': [
+      { name: 'Sialkot Sports & Leather Goods manufacturers', city: 'Sialkot', type: 'Manufacturer', wholesalePrice: `$${Math.round(wholesale * 0.7)}–$${wholesale}`, contact: '+92 52-325-xxxx', location: 'Sialkot Industrial Area', notes: 'World-famous leather & sports goods' },
+    ],
+    'istanbul-Textiles': [
+      { name: 'Osmanbey wholesale textile districts', city: 'Istanbul', type: 'Wholesale District', wholesalePrice: `$${Math.round(wholesale * 0.85)}–$${Math.round(wholesale * 1.1)}`, contact: '+90 212-231-xxxx', location: 'Osmanbey, Şişli, Istanbul', notes: 'Major textile & apparel wholesale' },
     ],
   };
 
   const key = `${city.toLowerCase()}-${category}`;
   if (known[key]) return known[key];
 
-  // Generic but realistic by region
   if (region === 'China') {
     list.push(
-      { name: `${cityCap} Industrial Zone manufacturers`, city: cityCap, type: 'Factory Cluster', wholesalePrice: `$${Math.round(wholesale * 0.8)}–$${wholesale}`, notes: 'Typical industrial park suppliers' },
-      { name: `${cityCap} Wholesale Trading Companies`, city: cityCap, type: 'Trading Company', wholesalePrice: `$${Math.round(wholesale * 0.9)}–$${Math.round(wholesale * 1.05)}`, notes: 'Export-oriented traders' },
+      { name: `${cityCap} Industrial Zone manufacturers`, city: cityCap, type: 'Factory Cluster', wholesalePrice: `$${Math.round(wholesale * 0.8)}–$${wholesale}`, contact: '+86 xxx-xxxx-xxxx', location: `${cityCap} Industrial Park`, notes: 'Typical industrial park suppliers' },
+      { name: `${cityCap} Wholesale Trading Companies`, city: cityCap, type: 'Trading Company', wholesalePrice: `$${Math.round(wholesale * 0.9)}–$${Math.round(wholesale * 1.05)}`, contact: '+86 xxx-xxxx-xxxx', location: `${cityCap} Trade District`, notes: 'Export-oriented traders' },
+      { name: `${cityCap} OEM workshops`, city: cityCap, type: 'OEM', wholesalePrice: `$${Math.round(wholesale * 0.75)}–$${Math.round(wholesale * 0.95)}`, contact: '+86 xxx-xxxx-xxxx', location: `${cityCap} outskirts`, notes: 'Small-batch OEM' },
     );
   } else if (region === 'India' || region === 'Pakistan') {
     list.push(
-      { name: `${cityCap} Local manufacturing units`, city: cityCap, type: 'SME Factories', wholesalePrice: `$${Math.round(wholesale * 0.75)}–$${wholesale}`, notes: 'Small-to-medium scale producers' },
-      { name: `${cityCap} Wholesale Mandi / Market traders`, city: cityCap, type: 'Wholesale Market', wholesalePrice: `$${Math.round(wholesale * 0.85)}–$${Math.round(wholesale * 1.05)}`, notes: 'Traditional wholesale markets' },
-    );
-  } else if (region === 'UAE' || region === 'Saudi Arabia') {
-    list.push(
-      { name: `${cityCap} Free Zone trading companies`, city: cityCap, type: 'Trading / Re-export', wholesalePrice: `$${Math.round(wholesale * 0.95)}–$${Math.round(wholesale * 1.15)}`, notes: 'Import-re-export focused' },
+      { name: `${cityCap} Local manufacturing units`, city: cityCap, type: 'SME Factories', wholesalePrice: `$${Math.round(wholesale * 0.75)}–$${wholesale}`, contact: '+92 / +91 xxx-xxxxxxx', location: `${cityCap} Industrial Area`, notes: 'Small-to-medium scale producers' },
+      { name: `${cityCap} Wholesale Mandi traders`, city: cityCap, type: 'Wholesale Market', wholesalePrice: `$${Math.round(wholesale * 0.85)}–$${Math.round(wholesale * 1.05)}`, contact: 'Local market phones', location: `${cityCap} Main Mandi`, notes: 'Traditional wholesale markets' },
+      { name: `${cityCap} Export agents`, city: cityCap, type: 'Exporter', wholesalePrice: `$${Math.round(wholesale * 0.9)}–$${Math.round(wholesale * 1.1)}`, contact: 'Via trade directories', location: `${cityCap}`, notes: 'Export-focused' },
     );
   } else {
     list.push(
-      { name: `${cityCap} Regional distributors`, city: cityCap, type: 'Distributor', wholesalePrice: `$${Math.round(wholesale * 0.9)}–$${Math.round(wholesale * 1.1)}`, notes: 'National/regional distribution' },
-      { name: `${cityCap} Import wholesale agents`, city: cityCap, type: 'Importer', wholesalePrice: `$${Math.round(wholesale * 0.95)}–$${Math.round(wholesale * 1.2)}`, notes: 'Import-based supply' },
+      { name: `${cityCap} Regional distributors`, city: cityCap, type: 'Distributor', wholesalePrice: `$${Math.round(wholesale * 0.9)}–$${Math.round(wholesale * 1.1)}`, contact: 'Local directory', location: `${cityCap} commercial zone`, notes: 'National/regional distribution' },
+      { name: `${cityCap} Import wholesale agents`, city: cityCap, type: 'Importer', wholesalePrice: `$${Math.round(wholesale * 0.95)}–$${Math.round(wholesale * 1.2)}`, contact: 'Trade contacts', location: `${cityCap}`, notes: 'Import-based supply' },
+      { name: `${cityCap} Industrial suppliers`, city: cityCap, type: 'Supplier', wholesalePrice: `$${Math.round(wholesale * 0.85)}–$${wholesale}`, contact: 'B2B listings', location: `${cityCap}`, notes: 'B2B supply' },
     );
   }
 
@@ -210,49 +207,50 @@ function generateFactories(product: string, city: string, category: string, regi
 
 function generateStores(product: string, city: string, category: string, region: string, retail: number): Store[] {
   const cityCap = city.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
-  const list: Store[] = [];
 
   const known: Record<string, Store[]> = {
     shenzhen: [
-      { name: 'Huaqiangbei Retail Shops', city: 'Shenzhen', type: 'Electronics Retail Cluster', retailPrice: `$${Math.round(retail * 0.95)}–$${Math.round(retail * 1.2)}`, notes: 'Dense retail for electronics & accessories' },
-      { name: 'SEG Plaza & nearby malls', city: 'Shenzhen', type: 'Mall Retail', retailPrice: `$${retail}–$${Math.round(retail * 1.3)}`, notes: 'Branded and generic electronics' },
+      { name: 'Huaqiangbei Retail Shops', city: 'Shenzhen', type: 'Electronics Retail Cluster', retailPrice: `$${Math.round(retail * 0.95)}–$${Math.round(retail * 1.2)}`, contact: '+86 755-8334-xxxx', location: 'Huaqiang North Rd, Futian', notes: 'Dense retail for electronics' },
+      { name: 'SEG Plaza shops', city: 'Shenzhen', type: 'Mall Retail', retailPrice: `$${retail}–$${Math.round(retail * 1.3)}`, contact: '+86 755-8321-xxxx', location: 'SEG Plaza, Huaqiangbei', notes: 'Branded and generic electronics' },
+      { name: 'MixC / COCO Park electronics', city: 'Shenzhen', type: 'Mall Retail', retailPrice: `$${Math.round(retail * 1.1)}–$${Math.round(retail * 1.4)}`, contact: 'Mall info desks', location: 'Nanshan / Futian malls', notes: 'Higher-end retail' },
     ],
     dubai: [
-      { name: 'Dragon Mart', city: 'Dubai', type: 'Retail / Wholesale Hybrid', retailPrice: `$${Math.round(retail * 0.9)}–$${Math.round(retail * 1.25)}`, notes: 'Large Chinese goods retail complex' },
-      { name: 'Computer Plaza / Al Ain Centre', city: 'Dubai', type: 'Electronics Retail', retailPrice: `$${retail}–$${Math.round(retail * 1.35)}`, notes: 'Popular for gadgets & accessories' },
+      { name: 'Dragon Mart', city: 'Dubai', type: 'Retail / Wholesale Hybrid', retailPrice: `$${Math.round(retail * 0.9)}–$${Math.round(retail * 1.25)}`, contact: '+971 4-333-xxxx', location: 'International City, Dubai', notes: 'Large Chinese goods complex' },
+      { name: 'Computer Plaza / Al Ain Centre', city: 'Dubai', type: 'Electronics Retail', retailPrice: `$${retail}–$${Math.round(retail * 1.35)}`, contact: '+971 4-295-xxxx', location: 'Bur Dubai', notes: 'Gadgets & accessories' },
+      { name: 'Deira City Centre electronics', city: 'Dubai', type: 'Mall Retail', retailPrice: `$${Math.round(retail * 1.05)}–$${Math.round(retail * 1.4)}`, contact: '+971 4-295-xxxx', location: 'Deira, Dubai', notes: 'Modern mall pricing' },
     ],
     karachi: [
-      { name: 'Saddar / Bolton Market area shops', city: 'Karachi', type: 'Traditional Retail', retailPrice: `$${Math.round(retail * 0.85)}–$${Math.round(retail * 1.15)}`, notes: 'Busy commercial retail zone' },
-      { name: 'Dolmen & local shopping malls', city: 'Karachi', type: 'Mall Retail', retailPrice: `$${Math.round(retail * 1.05)}–$${Math.round(retail * 1.4)}`, notes: 'Modern retail pricing' },
+      { name: 'Saddar Market shops', city: 'Karachi', type: 'Traditional Retail', retailPrice: `$${Math.round(retail * 0.85)}–$${Math.round(retail * 1.15)}`, contact: '+92 21-3568-xxxx', location: 'Saddar, Karachi', notes: 'Busy commercial zone' },
+      { name: 'Bolton Market outlets', city: 'Karachi', type: 'Traditional Retail', retailPrice: `$${Math.round(retail * 0.8)}–$${Math.round(retail * 1.1)}`, contact: '+92 21-3272-xxxx', location: 'Bolton Market, Karachi', notes: 'Wholesale-retail mix' },
+      { name: 'Dolmen Mall shops', city: 'Karachi', type: 'Mall Retail', retailPrice: `$${Math.round(retail * 1.05)}–$${Math.round(retail * 1.4)}`, contact: 'Mall stores', location: 'Clifton / Tariq Road', notes: 'Modern retail pricing' },
     ],
     lahore: [
-      { name: 'Anarkali / Hall Road market', city: 'Lahore', type: 'Traditional Market', retailPrice: `$${Math.round(retail * 0.8)}–$${Math.round(retail * 1.1)}`, notes: 'Electronics & general goods' },
-      { name: 'Packages Mall / Emporium shops', city: 'Lahore', type: 'Mall Retail', retailPrice: `$${Math.round(retail * 1.1)}–$${Math.round(retail * 1.45)}`, notes: 'Premium retail' },
+      { name: 'Hall Road Market', city: 'Lahore', type: 'Traditional Market', retailPrice: `$${Math.round(retail * 0.8)}–$${Math.round(retail * 1.1)}`, contact: '+92 42-3724-xxxx', location: 'Hall Road, Lahore', notes: 'Electronics & general goods' },
+      { name: 'Anarkali shops', city: 'Lahore', type: 'Traditional Retail', retailPrice: `$${Math.round(retail * 0.85)}–$${Math.round(retail * 1.15)}`, contact: 'Local shops', location: 'Anarkali Bazaar', notes: 'Classic bazaar retail' },
+      { name: 'Packages Mall / Emporium', city: 'Lahore', type: 'Mall Retail', retailPrice: `$${Math.round(retail * 1.1)}–$${Math.round(retail * 1.45)}`, contact: 'Mall info', location: 'Lahore', notes: 'Premium retail' },
     ],
     istanbul: [
-      { name: 'Grand Bazaar & nearby shops', city: 'Istanbul', type: 'Traditional Bazaar', retailPrice: `$${Math.round(retail * 0.9)}–$${Math.round(retail * 1.3)}`, notes: 'Historic trading district' },
-      { name: 'Osmanbey retail outlets', city: 'Istanbul', type: 'Apparel / Textile Retail', retailPrice: `$${retail}–$${Math.round(retail * 1.4)}`, notes: 'Fashion and textile focused' },
+      { name: 'Grand Bazaar shops', city: 'Istanbul', type: 'Traditional Bazaar', retailPrice: `$${Math.round(retail * 0.9)}–$${Math.round(retail * 1.3)}`, contact: '+90 212-522-xxxx', location: 'Beyazıt, Fatih', notes: 'Historic trading district' },
+      { name: 'Osmanbey retail outlets', city: 'Istanbul', type: 'Apparel / Textile Retail', retailPrice: `$${retail}–$${Math.round(retail * 1.4)}`, contact: '+90 212-231-xxxx', location: 'Osmanbey, Şişli', notes: 'Fashion and textile focused' },
+      { name: 'Cevahir / Zorlu mall stores', city: 'Istanbul', type: 'Mall Retail', retailPrice: `$${Math.round(retail * 1.1)}–$${Math.round(retail * 1.5)}`, contact: 'Mall stores', location: 'Şişli / Beşiktaş', notes: 'Modern mall pricing' },
     ],
     mumbai: [
-      { name: 'Crawford Market / Manish Market', city: 'Mumbai', type: 'Wholesale-Retail Mix', retailPrice: `$${Math.round(retail * 0.85)}–$${Math.round(retail * 1.2)}`, notes: 'Dense commercial markets' },
-      { name: 'Linking Road / Phoenix Malls', city: 'Mumbai', type: 'High-street & Mall', retailPrice: `$${Math.round(retail * 1.1)}–$${Math.round(retail * 1.5)}`, notes: 'Higher retail markup' },
+      { name: 'Crawford Market / Manish Market', city: 'Mumbai', type: 'Wholesale-Retail Mix', retailPrice: `$${Math.round(retail * 0.85)}–$${Math.round(retail * 1.2)}`, contact: '+91 22-2342-xxxx', location: 'Crawford Market, Mumbai', notes: 'Dense commercial markets' },
+      { name: 'Linking Road shops', city: 'Mumbai', type: 'High-street', retailPrice: `$${Math.round(retail * 1.05)}–$${Math.round(retail * 1.4)}`, contact: 'Shop front', location: 'Bandra West', notes: 'High-street retail' },
+      { name: 'Phoenix Mall stores', city: 'Mumbai', type: 'Mall Retail', retailPrice: `$${Math.round(retail * 1.1)}–$${Math.round(retail * 1.5)}`, contact: 'Mall stores', location: 'Lower Parel / Kurla', notes: 'Higher retail markup' },
     ],
   };
 
   const cityKey = city.toLowerCase();
   if (known[cityKey]) return known[cityKey];
 
-  // Generic realistic stores
-  list.push(
-    { name: `${cityCap} Central Market / Main Bazaar shops`, city: cityCap, type: 'Traditional Retail', retailPrice: `$${Math.round(retail * 0.9)}–$${Math.round(retail * 1.2)}`, notes: 'Local market pricing' },
-    { name: `${cityCap} Shopping Malls & Chain Stores`, city: cityCap, type: 'Modern Retail', retailPrice: `$${Math.round(retail * 1.05)}–$${Math.round(retail * 1.4)}`, notes: 'Branded and organized retail' },
-    { name: `${cityCap} Specialty ${category} stores`, city: cityCap, type: 'Specialty Retail', retailPrice: `$${retail}–$${Math.round(retail * 1.35)}`, notes: 'Category-focused retailers' },
-  );
-
-  return list;
+  return [
+    { name: `${cityCap} Central Market / Main Bazaar`, city: cityCap, type: 'Traditional Retail', retailPrice: `$${Math.round(retail * 0.9)}–$${Math.round(retail * 1.2)}`, contact: 'Local market phones', location: `${cityCap} Main Bazaar`, notes: 'Local market pricing' },
+    { name: `${cityCap} Shopping Malls & Chain Stores`, city: cityCap, type: 'Modern Retail', retailPrice: `$${Math.round(retail * 1.05)}–$${Math.round(retail * 1.4)}`, contact: 'Mall info desks', location: `${cityCap} malls`, notes: 'Branded and organized retail' },
+    { name: `${cityCap} Specialty ${category} stores`, city: cityCap, type: 'Specialty Retail', retailPrice: `$${retail}–$${Math.round(retail * 1.35)}`, contact: 'Store listings', location: `${cityCap}`, notes: 'Category-focused retailers' },
+  ];
 }
 
-// ─── Main research function ───────────────────────────────────────
 export function researchProduct(product: string, city: string): ResearchResult {
   const category = detectCategory(product);
   const region = getRegion(city);
