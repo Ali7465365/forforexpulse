@@ -1,4 +1,4 @@
-import { TrendingUp, Lock, Crown, Clock } from 'lucide-react';
+import { TrendingUp, Lock, Crown } from 'lucide-react';
 import { usePro } from '@/context/ProContext';
 
 type NavbarProps = {
@@ -9,7 +9,7 @@ type NavbarProps = {
 
 const navItems = [
   { id: 'map', label: 'Trade Map' },
-  { id: 'explore', label: 'Explore' },
+  { id: 'research', label: 'Product Research' },
   { id: 'dashboard', label: 'Intelligence' },
   { id: 'api-portal', label: 'API Portal' },
 ];
@@ -68,7 +68,6 @@ export default function Navbar({ currentPage, onNavigate, onOpenAds }: NavbarPro
         </div>
       </div>
 
-      {/* Mobile nav */}
       <nav className="flex items-center gap-1 border-t border-slate-800 px-4 py-2 md:hidden">
         {navItems.map((item) => (
           <button
