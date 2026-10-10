@@ -21,23 +21,38 @@ export default function Navbar({ currentPage, onNavigate, onOpenAds }: NavbarPro
   const { theme, toggleTheme } = useTheme();
   const [helpOpen, setHelpOpen] = useState(false);
 
+  const isDark = theme === 'dark';
+
+  const headerClass = isDark
+    ? 'sticky top-0 z-50 border-b border-slate-800 bg-slate-950/95 backdrop-blur-md'
+    : 'sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-md';
+
+  const logoText = isDark ? 'text-white' : 'text-slate-900';
+  const navIdle = isDark
+    ? 'text-slate-400 hover:bg-slate-800 hover:text-white'
+    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900';
+  const navActive = 'bg-emerald-500/10 text-emerald-500';
+  const mobileBorder = isDark ? 'border-slate-800' : 'border-slate-200';
+  const themeBtn = isDark
+    ? 'rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white'
+    : 'rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900';
+
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/95 backdrop-blur-md">
+      <header className={headerClass}>
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <button onClick={() => onNavigate('map')} className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-400 to-teal-600">
               <TrendingUp className="h-5 w-5 text-slate-950" />
             </div>
-            <span className="text-lg font-bold tracking-tight text-white">ForForex Pulse</span>
+            <span className={`text-lg font-bold tracking-tight ${logoText}`}>ForForex Pulse</span>
           </button>
 
           <nav className="hidden items-center gap-1 md:flex">
-            {/* ! circle — app guide (like games / websites) */}
             <button
               onClick={() => setHelpOpen(true)}
               title="How this app works"
-              className="mr-1 flex h-6 w-6 items-center justify-center rounded-full border border-amber-500/50 bg-amber-500/15 text-xs font-bold text-amber-400 transition hover:bg-amber-500/25 hover:border-amber-400"
+              className="mr-1 flex h-6 w-6 items-center justify-center rounded-full border border-amber-500/50 bg-amber-500/15 text-xs font-bold text-amber-500 transition hover:bg-amber-500/25"
             >
               !
             </button>
@@ -47,9 +62,7 @@ export default function Navbar({ currentPage, onNavigate, onOpenAds }: NavbarPro
                 key={item.id}
                 onClick={() => onNavigate(item.id)}
                 className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                  currentPage === item.id
-                    ? 'bg-emerald-500/10 text-emerald-400'
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                  currentPage === item.id ? navActive : navIdle
                 }`}
               >
                 {item.label}
@@ -58,30 +71,25 @@ export default function Navbar({ currentPage, onNavigate, onOpenAds }: NavbarPro
           </nav>
 
           <div className="flex items-center gap-2">
-            {/* Mobile ! button */}
             <button
               onClick={() => setHelpOpen(true)}
               title="How this app works"
-              className="flex h-7 w-7 items-center justify-center rounded-full border border-amber-500/50 bg-amber-500/15 text-xs font-bold text-amber-400 md:hidden"
+              className="flex h-7 w-7 items-center justify-center rounded-full border border-amber-500/50 bg-amber-500/15 text-xs font-bold text-amber-500 md:hidden"
             >
               !
             </button>
 
-            <button
-              onClick={toggleTheme}
-              className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white"
-              title="Toggle theme"
-            >
-              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            <button onClick={toggleTheme} className={themeBtn} title="Toggle light / dark theme">
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
 
             {isPro ? (
               <div className="flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1.5">
                 <Crown className="h-4 w-4 text-amber-400" />
-                <span className="text-sm font-semibold text-amber-300">
+                <span className="text-sm font-semibold text-amber-500">
                   PRO
                   {timeRemaining && (
-                    <span className="ml-1.5 text-xs font-normal text-amber-400/70">
+                    <span className="ml-1.5 text-xs font-normal text-amber-500/70">
                       {timeRemaining.days}d {timeRemaining.hours}h
                     </span>
                   )}
@@ -99,15 +107,13 @@ export default function Navbar({ currentPage, onNavigate, onOpenAds }: NavbarPro
           </div>
         </div>
 
-        <nav className="flex items-center gap-1 overflow-x-auto border-t border-slate-800 px-2 py-2 md:hidden">
+        <nav className={`flex items-center gap-1 overflow-x-auto border-t px-2 py-2 md:hidden ${mobileBorder}`}>
           {navItems.map((item) => (
             <button
               key={item.id}
               onClick={() => onNavigate(item.id)}
               className={`flex-shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                currentPage === item.id
-                  ? 'bg-emerald-500/10 text-emerald-400'
-                  : 'text-slate-400'
+                currentPage === item.id ? navActive : isDark ? 'text-slate-400' : 'text-slate-600'
               }`}
             >
               {item.label}
@@ -116,62 +122,81 @@ export default function Navbar({ currentPage, onNavigate, onOpenAds }: NavbarPro
         </nav>
       </header>
 
-      {/* App guide popup */}
       {helpOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-          <div className="relative w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
+          <div
+            className={`relative w-full max-w-md rounded-2xl border shadow-2xl ${
+              isDark ? 'border-slate-700 bg-slate-900' : 'border-slate-200 bg-white'
+            }`}
+          >
+            <div
+              className={`flex items-center justify-between border-b px-5 py-4 ${
+                isDark ? 'border-slate-800' : 'border-slate-200'
+              }`}
+            >
               <div className="flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full border border-amber-500/50 bg-amber-500/15 text-sm font-bold text-amber-400">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full border border-amber-500/50 bg-amber-500/15 text-sm font-bold text-amber-500">
                   !
                 </span>
-                <h2 className="text-base font-bold text-white">How ForForex Pulse works</h2>
+                <h2 className={`text-base font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  How ForForex Pulse works
+                </h2>
               </div>
               <button
                 onClick={() => setHelpOpen(false)}
-                className="text-slate-400 transition hover:text-white"
+                className={isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'}
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="space-y-4 px-5 py-5 text-sm text-slate-300">
+            <div className={`space-y-4 px-5 py-5 text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
               <div>
-                <p className="mb-1 font-semibold text-emerald-400">Trade Map</p>
-                <p className="text-xs text-slate-400">
+                <p className="mb-1 font-semibold text-emerald-500">Trade Map</p>
+                <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                   World map of trade hubs and sellers. Filter by category, click pins for details and prices.
                 </p>
               </div>
               <div>
-                <p className="mb-1 font-semibold text-emerald-400">Product Research</p>
-                <p className="text-xs text-slate-400">
+                <p className="mb-1 font-semibold text-emerald-500">Product Research</p>
+                <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                   Type a product + city. Get demand, quality, supply, prices, import %, competitors, plus factory and store cards. First 2 cards free; full contacts on PRO.
                 </p>
               </div>
               <div>
-                <p className="mb-1 font-semibold text-emerald-400">Intelligence</p>
-                <p className="text-xs text-slate-400">
+                <p className="mb-1 font-semibold text-emerald-500">Intelligence</p>
+                <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                   Ranked list of high-value items by score (price, supply, demand, margin). Best for scanning opportunities across markets.
                 </p>
               </div>
               <div>
-                <p className="mb-1 font-semibold text-emerald-400">API Portal</p>
-                <p className="text-xs text-slate-400">
+                <p className="mb-1 font-semibold text-emerald-500">API Portal</p>
+                <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                   Create API keys and test trade data queries for your own apps or tools.
                 </p>
               </div>
               <div>
-                <p className="mb-1 font-semibold text-amber-400">PRO ($10/mo)</p>
-                <p className="text-xs text-slate-400">
-                  Unlocks full store/factory contacts & locations, PRO trade signals, and higher API limits. Platinum ($25) for maximum API volume.
+                <p className="mb-1 font-semibold text-amber-500">PRO ($10/mo) & Platinum ($25/mo)</p>
+                <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                  PRO unlocks full store/factory contacts and locations, PRO signals, and higher API limits. Platinum adds maximum API volume.
                 </p>
               </div>
-              <p className="border-t border-slate-800 pt-3 text-[11px] text-slate-500">
-                Data is estimated from major trade hubs (~89–92% useful) — not live inventory.
-              </p>
+              <div
+                className={`rounded-lg border px-3 py-2 text-xs ${
+                  isDark ? 'border-slate-700 bg-slate-800/50 text-slate-400' : 'border-slate-200 bg-slate-50 text-slate-600'
+                }`}
+              >
+                <p className="font-medium text-emerald-500">Data accuracy</p>
+                <p className="mt-1">
+                  Our market information is about <strong>95% to 96% correct</strong> based on major trade hubs and regional patterns. Accuracy will be improved later with more updates.
+                </p>
+                <p className="mt-2">
+                  <strong>Updates will come</strong> — more cities, richer contacts, better prices, and new features over time.
+                </p>
+              </div>
             </div>
 
-            <div className="border-t border-slate-800 px-5 py-4">
+            <div className={`border-t px-5 py-4 ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
               <button
                 onClick={() => setHelpOpen(false)}
                 className="w-full rounded-lg bg-emerald-500 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-400"
