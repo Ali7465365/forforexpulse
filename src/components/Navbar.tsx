@@ -24,7 +24,7 @@ export default function Navbar({ currentPage, onNavigate, onOpenAds }: NavbarPro
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-400 to-teal-600">
             <TrendingUp className="h-5 w-5 text-slate-950" />
           </div>
-          <span className="text-lg font-bold tracking-tight text-white">MarketScope</span>
+          <span className="text-lg font-bold tracking-tight text-white">ForForex Pulse</span>
         </button>
 
         <nav className="hidden items-center gap-1 md:flex">
