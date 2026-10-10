@@ -31,8 +31,7 @@ const pageMeta: Record<Page, { title: string; description: string }> = {
 };
 
 function App() {
-  // Default to Product Research — first 30 seconds matter
-  const [currentPage, setCurrentPage] = useState<Page>('research');
+  const [currentPage, setCurrentPage] = useState<Page>('map');
   const [adModalOpen, setAdModalOpen] = useState(false);
 
   useEffect(() => {
