@@ -1,5 +1,3 @@
-// SEO utilities: dynamic document title, meta tag management, and sitemap generation helper.
-
 type MetaTag = {
   name?: string;
   property?: string;
@@ -44,7 +42,7 @@ export function updateSEO(opts: { title?: string; description?: string; path?: s
   setMetaTag({ property: 'og:url', content: `${window.location.origin}${opts.path ?? '/'}` });
 
   DEFAULT_META.forEach((m) => {
-    if (m.name === 'description' || (m.property === 'og:title') || (m.property === 'og:description') || (m.property === 'og:url')) return;
+    if (m.name === 'description' || m.property === 'og:title' || m.property === 'og:description' || m.property === 'og:url') return;
     setMetaTag(m);
   });
 }
@@ -53,14 +51,13 @@ export function initSEO() {
   DEFAULT_META.forEach(setMetaTag);
 }
 
-// Sitemap helper - generates a sitemap XML string for the application's routes
 export function generateSitemap(baseUrl: string = 'https://forforexpulse.app'): string {
   const routes = [
     { path: '/', priority: '1.0', changefreq: 'daily' },
+    { path: '/research', priority: '0.9', changefreq: 'daily' },
     { path: '/dashboard', priority: '0.9', changefreq: 'hourly' },
     { path: '/map', priority: '0.9', changefreq: 'realtime' },
     { path: '/api-portal', priority: '0.8', changefreq: 'weekly' },
-    { path: '/about', priority: '0.5', changefreq: 'monthly' },
   ];
 
   const now = new Date().toISOString().split('T')[0];
