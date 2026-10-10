@@ -7,18 +7,18 @@ type MetaTag = {
 };
 
 const DEFAULT_META: MetaTag[] = [
-  { name: 'description', content: 'MarketScope - Real-time global trade intelligence platform. Discover high-value trade opportunities, interactive market maps, and exclusive trade signals.' },
-  { property: 'og:title', content: 'MarketScope - Global Trade Intelligence Platform' },
+  { name: 'description', content: 'ForForex Pulse - Real-time global trade intelligence platform. Discover high-value trade opportunities, interactive market maps, and exclusive trade signals.' },
+  { property: 'og:title', content: 'ForForex Pulse - Global Trade Intelligence Platform' },
   { property: 'og:description', content: 'Real-time market intelligence, interactive trade hub maps, and high-margin trade signals for global traders.' },
   { property: 'og:type', content: 'website' },
   { property: 'og:image', content: 'https://bolt.new/static/og_default.png' },
   { name: 'twitter:card', content: 'summary_large_image' },
-  { name: 'twitter:title', content: 'MarketScope - Global Trade Intelligence' },
+  { name: 'twitter:title', content: 'ForForex Pulse - Global Trade Intelligence' },
   { name: 'twitter:description', content: 'Real-time market intelligence and trade signals for global traders.' },
   { name: 'twitter:image', content: 'https://bolt.new/static/og_default.png' },
-  { name: 'keywords', content: 'market intelligence, trade signals, global trade, trade hubs, market analysis, commodity trading, supply chain, trade map' },
+  { name: 'keywords', content: 'market intelligence, trade signals, global trade, trade hubs, market analysis, commodity trading, supply chain, trade map, forforex pulse' },
   { name: 'robots', content: 'index, follow' },
-  { name: 'author', content: 'MarketScope' },
+  { name: 'author', content: 'ForForex Pulse' },
 ];
 
 function setMetaTag(tag: MetaTag) {
@@ -35,7 +35,7 @@ function setMetaTag(tag: MetaTag) {
 }
 
 export function updateSEO(opts: { title?: string; description?: string; path?: string } = {}) {
-  const title = opts.title ?? 'MarketScope - Global Trade Intelligence Platform';
+  const title = opts.title ?? 'ForForex Pulse - Global Trade Intelligence Platform';
   document.title = title;
 
   setMetaTag({ name: 'description', content: opts.description ?? DEFAULT_META[0].content });
@@ -54,7 +54,7 @@ export function initSEO() {
 }
 
 // Sitemap helper - generates a sitemap XML string for the application's routes
-export function generateSitemap(baseUrl: string = 'https://marketscope.app'): string {
+export function generateSitemap(baseUrl: string = 'https://forforexpulse.app'): string {
   const routes = [
     { path: '/', priority: '1.0', changefreq: 'daily' },
     { path: '/dashboard', priority: '0.9', changefreq: 'hourly' },
