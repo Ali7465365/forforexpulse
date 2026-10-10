@@ -1,3 +1,48 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Light theme helpers when html has class "light" */
+html.light body {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+html.dark body {
+  background-color: #020617;
+  color: #f8fafc;
+}
+
+/* Utility: light: variant via class on html */
+@layer utilities {
+  .light\:bg-white\/95 {
+    html.light & {
+      background-color: rgb(255 255 255 / 0.95);
+    }
+  }
+  .light\:border-slate-200 {
+    html.light & {
+      border-color: #e2e8f0;
+    }
+  }
+  .light\:text-slate-900 {
+    html.light & {
+      color: #0f172a;
+    }
+  }
+  .light\:hover\:bg-slate-100:hover {
+    html.light & {
+      background-color: #f1f5f9;
+    }
+  }
+  .light\:hover\:text-slate-900:hover {
+    html.light & {
+      color: #0f172a;
+    }
+  }
+  .light\:bg-slate-50 {
+    html.light & {
+      background-color: #f8fafc;
+    }
+  }
+}
