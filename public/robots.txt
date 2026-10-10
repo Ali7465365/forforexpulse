@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /api-portal/keys
+Sitemap: https://marketscope.app/sitemap.xml
