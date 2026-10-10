@@ -154,7 +154,7 @@ export default function Navbar({ currentPage, onNavigate, onOpenAds }: NavbarPro
               <div>
                 <p className="mb-1 font-semibold text-emerald-500">Trade Map</p>
                 <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                  World map of trade hubs and sellers. Filter by category, click pins for details and prices.
+                  Use Trade Map to see major hubs and bigger market locations for your selected product on the world map.
                 </p>
               </div>
               <div>
@@ -183,7 +183,9 @@ export default function Navbar({ currentPage, onNavigate, onOpenAds }: NavbarPro
               </div>
               <div
                 className={`rounded-lg border px-3 py-2 text-xs ${
-                  isDark ? 'border-slate-700 bg-slate-800/50 text-slate-400' : 'border-slate-200 bg-slate-50 text-slate-600'
+                  isDark
+                    ? 'border-slate-700 bg-slate-800/50 text-slate-400'
+                    : 'border-slate-200 bg-slate-50 text-slate-600'
                 }`}
               >
                 <p className="font-medium text-emerald-500">Data accuracy</p>
