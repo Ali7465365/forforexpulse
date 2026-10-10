@@ -1,31 +1,37 @@
 import { useState, useEffect } from 'react';
 import { ProProvider } from '@/context/ProContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 import Navbar from '@/components/Navbar';
 import TradeMap from '@/components/TradeMap';
 import Dashboard from '@/components/Dashboard';
 import ApiPortal from '@/components/ApiPortal';
 import ProductResearch from '@/components/ProductResearch';
+import PricingPage from '@/components/PricingPage';
 import AdModal from '@/components/AdModal';
 import { updateSEO, initSEO } from '@/lib/seo';
 
-type Page = 'map' | 'research' | 'dashboard' | 'api-portal';
+type Page = 'map' | 'research' | 'dashboard' | 'api-portal' | 'pricing';
 
 const pageMeta: Record<Page, { title: string; description: string }> = {
   map: {
-    title: 'ForForex Pulse - Interactive Trade Map | Global Market Hubs & Sellers',
-    description: 'Explore an interactive global trade map with real-time seller pins, trade hubs, price popups, and product category filtering across major world markets.',
+    title: 'ForForex Pulse - Interactive Trade Map',
+    description: 'Explore global trade hubs and sellers on an interactive map.',
   },
   research: {
-    title: 'ForForex Pulse - Product Research | City-Level Market Intelligence',
-    description: 'Get detailed product demand, pricing, supply chain, factories and retail outlets for any product in any city.',
+    title: 'ForForex Pulse - Product Research',
+    description: 'City-level product demand, pricing and supply chain intelligence.',
   },
   dashboard: {
-    title: 'ForForex Pulse - Intelligence Dashboard | High-Value Trade Signals',
-    description: 'AI-ranked market intelligence dashboard showing high-value trade items by price, supply, demand, and competitor density.',
+    title: 'ForForex Pulse - Intelligence Dashboard',
+    description: 'AI-ranked high-value trade signals.',
   },
   'api-portal': {
-    title: 'ForForex Pulse - Developer API Portal | Trade Data API',
-    description: 'Generate API keys, monitor request limits, and test live trade data queries.',
+    title: 'ForForex Pulse - Developer API Portal',
+    description: 'API keys and live trade data queries.',
+  },
+  pricing: {
+    title: 'ForForex Pulse - Pricing Plans',
+    description: 'Free, Pro ($10) and Platinum ($25) plans. EasyPaisa, Stripe, PayPal.',
   },
 };
 
@@ -46,27 +52,26 @@ function App() {
     });
   }, [currentPage]);
 
-  const handleNavigate = (page: string) => {
-    setCurrentPage(page as Page);
-  };
-
   return (
-    <ProProvider>
-      <div className="min-h-screen bg-slate-950">
-        <Navbar
-          currentPage={currentPage}
-          onNavigate={handleNavigate}
-          onOpenAds={() => setAdModalOpen(true)}
-        />
+    <ThemeProvider>
+      <ProProvider>
+        <div className="min-h-screen bg-slate-950 dark:bg-slate-950 light:bg-slate-50">
+          <Navbar
+            currentPage={currentPage}
+            onNavigate={(p) => setCurrentPage(p as Page)}
+            onOpenAds={() => setAdModalOpen(true)}
+          />
 
-        {currentPage === 'map' && <TradeMap />}
-        {currentPage === 'research' && <ProductResearch />}
-        {currentPage === 'dashboard' && <Dashboard />}
-        {currentPage === 'api-portal' && <ApiPortal />}
+          {currentPage === 'map' && <TradeMap />}
+          {currentPage === 'research' && <ProductResearch />}
+          {currentPage === 'dashboard' && <Dashboard />}
+          {currentPage === 'api-portal' && <ApiPortal />}
+          {currentPage === 'pricing' && <PricingPage />}
 
-        <AdModal isOpen={adModalOpen} onClose={() => setAdModalOpen(false)} />
-      </div>
-    </ProProvider>
+          <AdModal isOpen={adModalOpen} onClose={() => setAdModalOpen(false)} />
+        </div>
+      </ProProvider>
+    </ThemeProvider>
   );
 }
 
