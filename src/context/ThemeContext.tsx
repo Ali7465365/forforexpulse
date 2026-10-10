@@ -11,23 +11,34 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem('ffp_theme');
-    return (saved === 'light' || saved === 'dark') ? saved : 'dark';
+    try {
+      const saved = localStorage.getItem('ffp_theme');
+      if (saved === 'light' || saved === 'dark') return saved;
+    } catch {
+      // ignore
+    }
+    return 'dark';
   });
 
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === 'light') {
+    if (theme === 'dark') {
+      root.classList.add('dark');
+      root.classList.remove('light');
+    } else {
       root.classList.remove('dark');
       root.classList.add('light');
-    } else {
-      root.classList.remove('light');
-      root.classList.add('dark');
     }
-    localStorage.setItem('ffp_theme', theme);
+    try {
+      localStorage.setItem('ffp_theme', theme);
+    } catch {
+      // ignore
+    }
   }, [theme]);
 
-  const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
+  const toggleTheme = () => {
+    setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
+  };
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
