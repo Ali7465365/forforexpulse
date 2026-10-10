@@ -12,19 +12,19 @@ type Page = 'map' | 'explore' | 'dashboard' | 'api-portal';
 
 const pageMeta: Record<Page, { title: string; description: string }> = {
   map: {
-    title: 'MarketScope - Interactive Trade Map | Global Market Hubs & Sellers',
+    title: 'ForForex Pulse - Interactive Trade Map | Global Market Hubs & Sellers',
     description: 'Explore an interactive global trade map with real-time seller pins, trade hubs, price popups, and product category filtering across major world markets.',
   },
   explore: {
-    title: 'MarketScope - Explore Markets by Country | Trade Hub Search',
+    title: 'ForForex Pulse - Explore Markets by Country | Trade Hub Search',
     description: 'Search and explore trade hubs, sellers, and market items by country and area. Discover trade opportunities in specific regions around the world.',
   },
   dashboard: {
-    title: 'MarketScope - Intelligence Dashboard | High-Value Trade Signals',
+    title: 'ForForex Pulse - Intelligence Dashboard | High-Value Trade Signals',
     description: 'AI-ranked market intelligence dashboard showing high-value trade items by price, supply, demand, and competitor density. Unlock PRO signals for exclusive margins.',
   },
   'api-portal': {
-    title: 'MarketScope - Developer API Portal | Trade Data API',
+    title: 'ForForex Pulse - Developer API Portal | Trade Data API',
     description: 'Generate API keys, monitor request limits, and test live trade data queries. Access global market intelligence data programmatically via REST API.',
   },
 };
