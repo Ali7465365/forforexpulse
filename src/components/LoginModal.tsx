@@ -16,6 +16,7 @@ export default function LoginModal({ isOpen, onClose, reason }: Props) {
     continueAsGuest,
     loading,
   } = useAuth();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
@@ -45,7 +46,10 @@ export default function LoginModal({ isOpen, onClose, reason }: Props) {
     onClose();
   }
 
-  const providers: { id: 'google' | 'github' | 'gitlab' | 'facebook' | 'twitter'; label: string }[] = [
+  const providers: {
+    id: 'google' | 'github' | 'gitlab' | 'facebook' | 'twitter';
+    label: string;
+  }[] = [
     { id: 'google', label: 'Google' },
     { id: 'github', label: 'GitHub' },
     { id: 'gitlab', label: 'GitLab' },
@@ -58,7 +62,7 @@ export default function LoginModal({ isOpen, onClose, reason }: Props) {
       <div className="relative w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl">
         <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
           <h2 className="text-lg font-bold text-white">Sign in</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-white">
+          <button onClick={onClose} className="text-slate-400 transition hover:text-white">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -74,9 +78,10 @@ export default function LoginModal({ isOpen, onClose, reason }: Props) {
             {providers.map((p) => (
               <button
                 key={p.id}
+                type="button"
                 disabled={loading || busy}
                 onClick={() => signInWithOAuth(p.id)}
-                className="rounded-lg border border-slate-700 bg-slate-800 py-2.5 text-sm font-semibold text-white transition hover:border-slate-500 hover:bg-slate-750"
+                className="rounded-lg border border-slate-700 bg-slate-800 py-2.5 text-sm font-semibold text-white transition hover:border-slate-500 hover:bg-slate-700 disabled:opacity-60"
               >
                 Continue with {p.label}
               </button>
@@ -111,7 +116,7 @@ export default function LoginModal({ isOpen, onClose, reason }: Props) {
             <button
               type="submit"
               disabled={busy}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 py-2.5 text-sm font-bold text-white hover:bg-emerald-400 disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-400 disabled:opacity-60"
             >
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
               {mode === 'signin' ? 'Sign in with email' : 'Create account'}
@@ -121,7 +126,7 @@ export default function LoginModal({ isOpen, onClose, reason }: Props) {
           <button
             type="button"
             onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
-            className="w-full text-center text-xs text-slate-400 hover:text-emerald-400"
+            className="w-full text-center text-xs text-slate-400 transition hover:text-emerald-400"
           >
             {mode === 'signin' ? 'Need an account? Sign up' : 'Already have an account? Sign in'}
           </button>
@@ -133,6 +138,7 @@ export default function LoginModal({ isOpen, onClose, reason }: Props) {
           >
             Skip for now (guest)
           </button>
+
           <p className="text-center text-[10px] text-slate-500">
             Guests can browse. You must sign in to buy Pro or Platinum.
           </p>
