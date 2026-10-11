@@ -1,18 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { ProProvider } from '@/context/ProContext';
 import { ThemeProvider, useTheme } from '@/context/ThemeContext';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import Navbar from '@/components/Navbar';
-import TradeMap from '@/components/TradeMap';
-import Dashboard from '@/components/Dashboard';
-import ApiPortal from '@/components/ApiPortal';
-import ProductResearch from '@/components/ProductResearch';
-import BusinessAdvisor from '@/components/BusinessAdvisor';
 import AdModal from '@/components/AdModal';
 import LoginModal from '@/components/LoginModal';
 import { updateSEO, initSEO } from '@/lib/seo';
 
+const TradeMap = lazy(() => import('@/components/TradeMap'));
+const ProductResearch = lazy(() => import('@/components/ProductResearch'));
+const BusinessAdvisor = lazy(() => import('@/components/BusinessAdvisor'));
+const Dashboard = lazy(() => import('@/components/Dashboard'));
+const ApiPortal = lazy(() => import('@/components/ApiPortal'));
+
 type Page = 'map' | 'research' | 'business' | 'dashboard' | 'api-portal';
+type PlanId = 'pro' | 'platinum';
 
 const pageMeta: Record<Page, { title: string; description: string }> = {
   map: {
@@ -37,6 +39,14 @@ const pageMeta: Record<Page, { title: string; description: string }> = {
   },
 };
 
+function PageLoader() {
+  return (
+    <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
+    </div>
+  );
+}
+
 function AppShell() {
   const { theme } = useTheme();
   const { isLoggedIn, isGuest, loading } = useAuth();
@@ -44,17 +54,32 @@ function AppShell() {
   const [adModalOpen, setAdModalOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [loginReason, setLoginReason] = useState('');
+  // After login from a Purchase click → open plans on pay step for this plan
+  const [pendingBuyPlan, setPendingBuyPlan] = useState<PlanId | null>(null);
 
   useEffect(() => {
     initSEO();
   }, []);
 
+  // Every time app loads and user is not logged in → show login (guest can skip)
   useEffect(() => {
-    if (!loading && !isLoggedIn && !isGuest) {
+    if (!loading && !isLoggedIn) {
       setLoginOpen(true);
-      setLoginReason('Sign in to use ForForex Pulse, or skip as guest.');
+      setLoginReason(
+        isGuest
+          ? 'You are in guest mode. Sign in for full account, or continue as guest.'
+          : 'Sign in to ForForex Pulse, or skip as guest to browse.'
+      );
     }
   }, [loading, isLoggedIn, isGuest]);
+
+  // After successful login while buying → reopen plans on payment step
+  useEffect(() => {
+    if (isLoggedIn && pendingBuyPlan) {
+      setLoginOpen(false);
+      setAdModalOpen(true);
+    }
+  }, [isLoggedIn, pendingBuyPlan]);
 
   useEffect(() => {
     const meta = pageMeta[currentPage];
@@ -65,13 +90,25 @@ function AppShell() {
     });
   }, [currentPage]);
 
+  /** Unlock PRO — everyone (including guest) can OPEN plans and see specs */
   function openPlans() {
-    if (!isLoggedIn) {
-      setLoginReason('You must sign in to buy Pro or Platinum. Guest cannot purchase.');
-      setLoginOpen(true);
-      return;
-    }
     setAdModalOpen(true);
+  }
+
+  /** Guest clicked Purchase → login first, remember which plan */
+  function requireLoginToBuy(planId: PlanId) {
+    setPendingBuyPlan(planId);
+    setAdModalOpen(false);
+    setLoginReason('Sign in to buy this plan. After login you can choose EasyPaisa, PayPal or Stripe.');
+    setLoginOpen(true);
+  }
+
+  function handleLoginClose() {
+    setLoginOpen(false);
+    // If still not logged in, cancel pending buy
+    if (!isLoggedIn) {
+      setPendingBuyPlan(null);
+    }
   }
 
   const shellClass =
@@ -87,22 +124,31 @@ function AppShell() {
         onOpenAds={openPlans}
         onOpenLogin={() => {
           setLoginReason('');
+          setPendingBuyPlan(null);
           setLoginOpen(true);
         }}
       />
 
-      {currentPage === 'map' && <TradeMap />}
-      {currentPage === 'research' && <ProductResearch onOpenPlans={openPlans} />}
-      {currentPage === 'business' && <BusinessAdvisor />}
-      {currentPage === 'dashboard' && <Dashboard />}
-      {currentPage === 'api-portal' && <ApiPortal />}
+      <Suspense fallback={<PageLoader />}>
+        {currentPage === 'map' && <TradeMap />}
+        {currentPage === 'research' && <ProductResearch onOpenPlans={openPlans} />}
+        {currentPage === 'business' && <BusinessAdvisor />}
+        {currentPage === 'dashboard' && <Dashboard />}
+        {currentPage === 'api-portal' && <ApiPortal />}
+      </Suspense>
 
-      <AdModal isOpen={adModalOpen} onClose={() => setAdModalOpen(false)} />
-      <LoginModal
-        isOpen={loginOpen}
-        onClose={() => setLoginOpen(false)}
-        reason={loginReason}
+      <AdModal
+        isOpen={adModalOpen}
+        onClose={() => {
+          setAdModalOpen(false);
+          if (!isLoggedIn) setPendingBuyPlan(null);
+        }}
+        pendingPlan={isLoggedIn ? pendingBuyPlan : null}
+        onPendingPlanConsumed={() => setPendingBuyPlan(null)}
+        onRequireLogin={requireLoginToBuy}
       />
+
+      <LoginModal isOpen={loginOpen} onClose={handleLoginClose} reason={loginReason} />
     </div>
   );
 }
