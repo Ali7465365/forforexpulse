@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Mail, Loader2 } from 'lucide-react';
+import { Mail, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 type Props = {
@@ -60,11 +60,8 @@ export default function LoginModal({ isOpen, onClose, reason }: Props) {
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
       <div className="relative w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
+        <div className="border-b border-slate-800 px-5 py-4">
           <h2 className="text-lg font-bold text-white">Sign in</h2>
-          <button onClick={onClose} className="text-slate-400 transition hover:text-white">
-            <X className="h-5 w-5" />
-          </button>
         </div>
 
         <div className="space-y-4 p-5">
@@ -140,7 +137,7 @@ export default function LoginModal({ isOpen, onClose, reason }: Props) {
           </button>
 
           <p className="text-center text-[10px] text-slate-500">
-            Guests can browse. You must sign in to buy Pro or Platinum.
+            Guests can browse and view plans. Sign in is required only to purchase Pro or Platinum.
           </p>
         </div>
       </div>
