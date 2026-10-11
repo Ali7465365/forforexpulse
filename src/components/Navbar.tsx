@@ -12,6 +12,7 @@ type NavbarProps = {
 const navItems = [
   { id: 'map', label: 'Trade Map' },
   { id: 'research', label: 'Product Research' },
+  { id: 'business', label: 'Business' },
   { id: 'dashboard', label: 'Intelligence' },
   { id: 'api-portal', label: 'API Portal' },
 ];
@@ -161,6 +162,12 @@ export default function Navbar({ currentPage, onNavigate, onOpenAds }: NavbarPro
                 <p className="mb-1 font-semibold text-emerald-500">Product Research</p>
                 <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                   Type a product + city. Get demand, quality, supply, prices, import %, competitors, plus factory and store cards. First 2 cards free; full contacts on PRO.
+                </p>
+              </div>
+              <div>
+                <p className="mb-1 font-semibold text-emerald-500">Business</p>
+                <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                  Enter area, city and country. For a new business, get ideas of what to open. For an ongoing business, get ideas on how to expand.
                 </p>
               </div>
               <div>
