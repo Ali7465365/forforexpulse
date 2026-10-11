@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { TrendingUp, Lock, Crown, Sun, Moon, X } from 'lucide-react';
+import { TrendingUp, Lock, Crown, Sun, Moon, X, LogIn, LogOut } from 'lucide-react';
 import { usePro } from '@/context/ProContext';
 import { useTheme } from '@/context/ThemeContext';
+import { useAuth } from '@/context/AuthContext';
 
 type NavbarProps = {
   currentPage: string;
   onNavigate: (page: string) => void;
   onOpenAds: () => void;
+  onOpenLogin: () => void;
 };
 
 const navItems = [
@@ -17,9 +19,10 @@ const navItems = [
   { id: 'api-portal', label: 'API Portal' },
 ];
 
-export default function Navbar({ currentPage, onNavigate, onOpenAds }: NavbarProps) {
+export default function Navbar({ currentPage, onNavigate, onOpenAds, onOpenLogin }: NavbarProps) {
   const { isPro, timeRemaining } = usePro();
   const { theme, toggleTheme } = useTheme();
+  const { isLoggedIn, user, isGuest, signOut } = useAuth();
   const [helpOpen, setHelpOpen] = useState(false);
 
   const isDark = theme === 'dark';
@@ -53,9 +56,9 @@ export default function Navbar({ currentPage, onNavigate, onOpenAds }: NavbarPro
             <button
               onClick={() => setHelpOpen(true)}
               title="How this app works"
-              className="mr-1 flex h-6 w-6 items-center justify-center rounded-full border border-amber-500/50 bg-amber-500/15 text-xs font-bold text-amber-500 transition hover:bg-amber-500/25"
+              className="mr-1 flex h-6 w-6 items-center justify-center rounded-full border border-sky-500/50 bg-sky-500/15 text-xs font-bold italic text-sky-400 transition hover:bg-sky-500/25"
             >
-              !
+              i
             </button>
 
             {navItems.map((item) => (
@@ -75,14 +78,37 @@ export default function Navbar({ currentPage, onNavigate, onOpenAds }: NavbarPro
             <button
               onClick={() => setHelpOpen(true)}
               title="How this app works"
-              className="flex h-7 w-7 items-center justify-center rounded-full border border-amber-500/50 bg-amber-500/15 text-xs font-bold text-amber-500 md:hidden"
+              className="flex h-7 w-7 items-center justify-center rounded-full border border-sky-500/50 bg-sky-500/15 text-xs font-bold italic text-sky-400 md:hidden"
             >
-              !
+              i
             </button>
 
-            <button onClick={toggleTheme} className={themeBtn} title="Toggle light / dark theme">
+            <button onClick={toggleTheme} className={themeBtn} title="Toggle theme">
               {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
+
+            {isLoggedIn ? (
+              <div className="flex items-center gap-2">
+                <span className={`hidden max-w-[100px] truncate text-xs sm:inline ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                  {user?.email ?? 'Account'}
+                </span>
+                <button
+                  onClick={() => signOut()}
+                  className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white"
+                  title="Sign out"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={onOpenLogin}
+                className="flex items-center gap-1.5 rounded-lg border border-slate-600 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:border-slate-400 hover:text-white"
+              >
+                <LogIn className="h-3.5 w-3.5" />
+                {isGuest ? 'Guest · Sign in' : 'Sign in'}
+              </button>
+            )}
 
             {isPro ? (
               <div className="flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1.5">
@@ -136,8 +162,8 @@ export default function Navbar({ currentPage, onNavigate, onOpenAds }: NavbarPro
               }`}
             >
               <div className="flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full border border-amber-500/50 bg-amber-500/15 text-sm font-bold text-amber-500">
-                  !
+                <span className="flex h-7 w-7 items-center justify-center rounded-full border border-sky-500/50 bg-sky-500/15 text-sm font-bold italic text-sky-400">
+                  i
                 </span>
                 <h2 className={`text-base font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   How ForForex Pulse works
@@ -173,7 +199,7 @@ export default function Navbar({ currentPage, onNavigate, onOpenAds }: NavbarPro
               <div>
                 <p className="mb-1 font-semibold text-emerald-500">Intelligence</p>
                 <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                  Ranked list of high-value items by score (price, supply, demand, margin). Best for scanning opportunities across markets.
+                  Ranked list of high-value items by score. Best for scanning opportunities across markets.
                 </p>
               </div>
               <div>
@@ -183,24 +209,19 @@ export default function Navbar({ currentPage, onNavigate, onOpenAds }: NavbarPro
                 </p>
               </div>
               <div>
-                <p className="mb-1 font-semibold text-amber-500">PRO ($10/mo) & Platinum ($25/mo)</p>
+                <p className="mb-1 font-semibold text-amber-500">Login & plans</p>
                 <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                  PRO unlocks full store/factory contacts and locations, PRO signals, and higher API limits. Platinum adds maximum API volume.
+                  You can skip as guest to browse. To buy Pro ($10) or Platinum ($25) you must sign in (Google, GitHub, GitLab, Facebook, X, or email).
                 </p>
               </div>
               <div
                 className={`rounded-lg border px-3 py-2 text-xs ${
-                  isDark
-                    ? 'border-slate-700 bg-slate-800/50 text-slate-400'
-                    : 'border-slate-200 bg-slate-50 text-slate-600'
+                  isDark ? 'border-slate-700 bg-slate-800/50 text-slate-400' : 'border-slate-200 bg-slate-50 text-slate-600'
                 }`}
               >
                 <p className="font-medium text-emerald-500">Data accuracy</p>
                 <p className="mt-1">
-                  Our market information is about <strong>95% to 96% correct</strong> based on major trade hubs and regional patterns. Accuracy will be improved later with more updates.
-                </p>
-                <p className="mt-2">
-                  <strong>Updates will come</strong> — more cities, richer contacts, better prices, and new features over time.
+                  Our market information is about <strong>95% to 96% correct</strong>. Accuracy will improve with updates.
                 </p>
               </div>
             </div>
@@ -208,7 +229,7 @@ export default function Navbar({ currentPage, onNavigate, onOpenAds }: NavbarPro
             <div className={`border-t px-5 py-4 ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
               <button
                 onClick={() => setHelpOpen(false)}
-                className="w-full rounded-lg bg-emerald-500 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-400"
+                className="w-full rounded-lg bg-emerald-500 py-2.5 text-sm font-semibold text-white hover:bg-emerald-400"
               >
                 Got it
               </button>
