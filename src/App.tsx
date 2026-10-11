@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ProProvider } from '@/context/ProContext';
 import { ThemeProvider, useTheme } from '@/context/ThemeContext';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
 import Navbar from '@/components/Navbar';
 import TradeMap from '@/components/TradeMap';
 import Dashboard from '@/components/Dashboard';
@@ -8,6 +9,7 @@ import ApiPortal from '@/components/ApiPortal';
 import ProductResearch from '@/components/ProductResearch';
 import BusinessAdvisor from '@/components/BusinessAdvisor';
 import AdModal from '@/components/AdModal';
+import LoginModal from '@/components/LoginModal';
 import { updateSEO, initSEO } from '@/lib/seo';
 
 type Page = 'map' | 'research' | 'business' | 'dashboard' | 'api-portal';
@@ -37,12 +39,22 @@ const pageMeta: Record<Page, { title: string; description: string }> = {
 
 function AppShell() {
   const { theme } = useTheme();
+  const { isLoggedIn, isGuest, loading } = useAuth();
   const [currentPage, setCurrentPage] = useState<Page>('map');
   const [adModalOpen, setAdModalOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [loginReason, setLoginReason] = useState('');
 
   useEffect(() => {
     initSEO();
   }, []);
+
+  useEffect(() => {
+    if (!loading && !isLoggedIn && !isGuest) {
+      setLoginOpen(true);
+      setLoginReason('Sign in to use ForForex Pulse, or skip as guest.');
+    }
+  }, [loading, isLoggedIn, isGuest]);
 
   useEffect(() => {
     const meta = pageMeta[currentPage];
@@ -52,6 +64,15 @@ function AppShell() {
       path: `/${currentPage === 'map' ? '' : currentPage}`,
     });
   }, [currentPage]);
+
+  function openPlans() {
+    if (!isLoggedIn) {
+      setLoginReason('You must sign in to buy Pro or Platinum. Guest cannot purchase.');
+      setLoginOpen(true);
+      return;
+    }
+    setAdModalOpen(true);
+  }
 
   const shellClass =
     theme === 'dark'
@@ -63,18 +84,25 @@ function AppShell() {
       <Navbar
         currentPage={currentPage}
         onNavigate={(p) => setCurrentPage(p as Page)}
-        onOpenAds={() => setAdModalOpen(true)}
+        onOpenAds={openPlans}
+        onOpenLogin={() => {
+          setLoginReason('');
+          setLoginOpen(true);
+        }}
       />
 
       {currentPage === 'map' && <TradeMap />}
-      {currentPage === 'research' && (
-        <ProductResearch onOpenPlans={() => setAdModalOpen(true)} />
-      )}
+      {currentPage === 'research' && <ProductResearch onOpenPlans={openPlans} />}
       {currentPage === 'business' && <BusinessAdvisor />}
       {currentPage === 'dashboard' && <Dashboard />}
       {currentPage === 'api-portal' && <ApiPortal />}
 
       <AdModal isOpen={adModalOpen} onClose={() => setAdModalOpen(false)} />
+      <LoginModal
+        isOpen={loginOpen}
+        onClose={() => setLoginOpen(false)}
+        reason={loginReason}
+      />
     </div>
   );
 }
@@ -82,9 +110,11 @@ function AppShell() {
 function App() {
   return (
     <ThemeProvider>
-      <ProProvider>
-        <AppShell />
-      </ProProvider>
+      <AuthProvider>
+        <ProProvider>
+          <AppShell />
+        </ProProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
