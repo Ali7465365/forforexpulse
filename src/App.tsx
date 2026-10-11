@@ -6,10 +6,11 @@ import TradeMap from '@/components/TradeMap';
 import Dashboard from '@/components/Dashboard';
 import ApiPortal from '@/components/ApiPortal';
 import ProductResearch from '@/components/ProductResearch';
+import BusinessAdvisor from '@/components/BusinessAdvisor';
 import AdModal from '@/components/AdModal';
 import { updateSEO, initSEO } from '@/lib/seo';
 
-type Page = 'map' | 'research' | 'dashboard' | 'api-portal';
+type Page = 'map' | 'research' | 'business' | 'dashboard' | 'api-portal';
 
 const pageMeta: Record<Page, { title: string; description: string }> = {
   map: {
@@ -19,6 +20,10 @@ const pageMeta: Record<Page, { title: string; description: string }> = {
   research: {
     title: 'ForForex Pulse - Product Research',
     description: 'City-level product demand, pricing and supply chain intelligence.',
+  },
+  business: {
+    title: 'ForForex Pulse - Business Advisor',
+    description: 'New or ongoing business advice by area, city and country.',
   },
   dashboard: {
     title: 'ForForex Pulse - Intelligence Dashboard',
@@ -65,6 +70,7 @@ function AppShell() {
       {currentPage === 'research' && (
         <ProductResearch onOpenPlans={() => setAdModalOpen(true)} />
       )}
+      {currentPage === 'business' && <BusinessAdvisor />}
       {currentPage === 'dashboard' && <Dashboard />}
       {currentPage === 'api-portal' && <ApiPortal />}
 
